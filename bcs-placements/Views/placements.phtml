@@ -1,0 +1,414 @@
+<?php require('template/header.phtml'); ?>
+
+  <main class="page-content">
+
+    <div class="container-fluid">
+
+        <!-- Page Heading -->
+        <div class="row px-4">
+            <div id="title" class="col-12 mb-0">
+                <h1 class="pg-heading text-white fw-bold px-2 py-0 paw-bg">
+                    💼 Latest Opportunities
+                </h1>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="row px-4">
+            <!-- LEFT SIDEBAR - Search and Filters -->
+            <div class="col-lg-3 mb-4">
+                <div class="card shadow rounded-4 paw-bg sticky-top" style="top: 22px;">
+                    <div class="card-header text-white shadow" style="background-color: #212529; border-top-left-radius: 15px; border-top-right-radius: 15px">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0 pop-obj"><strong>🔍 Search & Filter</strong></h4>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                        <form action="placements.php" method="GET">
+                            <!-- Search Bar -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Search</label>
+                                <input type="search"
+                                       name="search"
+                                       class="form-control rounded-3 shadow-sm pop-obj"
+                                       placeholder="Job title, company, location..."
+                                       value="<?= htmlspecialchars($view->searchTerm ?? '') ?>">
+                            </div>
+
+                            <!-- Location Filter -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Location</label>
+                                <select name="location" class="form-select rounded-3 shadow-sm pop-obj">
+                                    <option value="">All Locations</option>
+                                    <?php foreach ($view->availableLocations as $location): ?>
+                                        <option value="<?= htmlspecialchars($location) ?>"
+                                                <?= $view->filterLocation === $location ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($location) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Employer Filter -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Employer</label>
+                                <select name="employer" class="form-select rounded-3 shadow-sm pop-obj">
+                                    <option value="">All Employers</option>
+                                    <?php foreach ($view->availableEmployers as $employer): ?>
+                                        <option value="<?= htmlspecialchars($employer) ?>"
+                                                <?= $view->filterEmployer === $employer ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($employer) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <!-- Salary Filter -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Minimum Salary</label>
+                                <select name="salary_min" class="form-select rounded-3 shadow-sm pop-obj">
+                                    <option value="">Any Salary</option>
+                                    <option value="20000" <?= $view->filterSalary === '20000' ? 'selected' : '' ?>>£20k+</option>
+                                    <option value="25000" <?= $view->filterSalary === '25000' ? 'selected' : '' ?>>£25k+</option>
+                                    <option value="30000" <?= $view->filterSalary === '30000' ? 'selected' : '' ?>>£30k+</option>
+                                    <option value="35000" <?= $view->filterSalary === '35000' ? 'selected' : '' ?>>£35k+</option>
+                                </select>
+                            </div>
+
+                            <!-- Duration Filter -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Duration</label>
+                                <select name="duration" class="form-select rounded-3 shadow-sm pop-obj">
+                                    <option value="">Any Duration</option>
+                                    <option value="6" <?= $view->filterDuration === '6' ? 'selected' : '' ?>>6 months</option>
+                                    <option value="12" <?= $view->filterDuration === '12' ? 'selected' : '' ?>>12 months</option>
+                                    <option value="18" <?= $view->filterDuration === '18' ? 'selected' : '' ?>>18 months</option>
+                                </select>
+                            </div>
+
+                            <!-- Sort -->
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Sort By</label>
+                                <select name="sort" class="form-select rounded-3 shadow-sm pop-obj">
+                                    <option value="latest" <?= $view->sortBy === 'latest' ? 'selected' : '' ?>>Latest</option>
+                                    <option value="deadline" <?= $view->sortBy === 'deadline' ? 'selected' : '' ?>>Closest Deadline</option>
+                                    <option value="start_date" <?= $view->sortBy === 'start_date' ? 'selected' : '' ?>>Start Date</option>
+                                    <option value="salary_high" <?= $view->sortBy === 'salary_high' ? 'selected' : '' ?>>Salary (High to Low)</option>
+                                    <option value="salary_low" <?= $view->sortBy === 'salary_low' ? 'selected' : '' ?>>Salary (Low to High)</option>
+                                    <?php if ($view->user->isLoggedIn() && $view->user->isStudent()): ?>
+                                        <option value="match_desc" <?= $view->sort === 'match_desc' ? 'selected' : '' ?>>Match (Highest First)</option>
+                                    <?php endif; ?>
+                                </select>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary rounded-3 shadow pop-obj">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search-2" viewBox="0 0 16 16">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                                    </svg>
+                                    Apply Filters
+                                </button>
+                                <a href="placements.php" class="btn btn-outline-secondary rounded-3 shadow-sm pop-obj">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser-fill-2" viewBox="0 0 16 16">
+                                        <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828zm.66 11.34L3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293z"/>
+                                    </svg>
+                                    Clear Filters
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE - Placements List -->
+            <div class="col-lg-9">
+                <!-- Results Count -->
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <p class="text-white fs-6">
+                            <?php
+                            $count = count($view->placements);
+                            $label = ($count === 1) ? "opportunity" : "opportunities";
+                            ?>
+                            <strong><?= $view->totalPlacements ?></strong> <?= $label ?> available
+                            <?php if (!empty($view->searchTerm) || !empty($view->filterLocation) || !empty($view->filterEmployer) || !empty($view->filterSalary) || !empty($view->filterDuration)): ?>
+                                (Filters active)
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Placements List -->
+                <?php if (!empty($view->placements)): ?>
+                    <?php foreach ($view->placements as $placement): ?>
+                        <div class="card pop-obj mb-4 shadow rounded-4 position-relative" style="overflow: hidden;">
+                            <!-- Bookmark Button (Top Right) -->
+                            <?php if ($view->user->isLoggedIn() && $view->user->getUserType() === 'student'): ?>
+                                <?php $isShortlisted = in_array($placement->getPlacementId(), $view->shortlistedIds); ?>
+                                <button class="btn btn-link position-absolute shortlist-btn p-2"
+                                        style="top: 10px; right: 10px; z-index: 10;"
+                                        data-placement-id="<?= $placement->getPlacementId() ?>"
+                                        data-shortlisted="<?= $isShortlisted ? 'true' : 'false' ?>"
+                                        data-bs-toggle="popover"
+                                        data-bs-trigger="focus"
+                                        data-bs-html="true"
+                                        data-bs-placement="left"
+                                        data-bs-content='Go to <a href="dashboard.php#shortlist-section" class="text-decoration-underline fw-bold">shortlist</a>'>
+                                    <?php if ($isShortlisted): ?>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-check-fill bookmark-icon text-success" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5m8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/>
+                                        </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-dash bookmark-hover-icon text-danger d-none" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5M6 6a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1z"/>
+                                        </svg>
+                                    <?php else: ?>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-plus bookmark-icon text-primary" viewBox="0 0 16 16">
+                                            <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1z"/>
+                                            <path d="M8 4a.5.5 0 0 1 .5.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5A.5.5 0 0 1 8 4"/>
+                                        </svg>
+                                    <?php endif; ?>
+                                </button>
+                            <?php endif; ?>
+
+                            <div class="card-body p-0">
+                                <div class="row g-0 align-items-center">
+                                    <!-- Company Logo (Left) -->
+                                    <div class="col-auto d-flex align-items-center justify-content-center p-3" style="width: 180px;">
+                                        <a href="placement_details.php?id=<?= $placement->getPlacementId() ?>">
+                                            <?php if ($placement->getCompanyLogo()): ?>
+                                                <img src="<?= htmlspecialchars($placement->getCompanyLogo()) ?>"
+                                                    alt="<?= htmlspecialchars($placement->getCompanyName()) ?>"
+                                                    class="img-fluid rounded-3 shadow-sm"
+                                                    style="max-width: 150px; max-height: 80px; object-fit: contain;">
+                                            <?php else: ?>
+                                                <div class="bg-secondary rounded-3 d-flex align-items-center justify-content-center text-white"
+                                                    style="width: 150px; height: 80px;">
+                                                    <span class="fs-1">🏢</span>
+                                                </div>
+                                            <?php endif; ?>
+                                        </a>
+                                    </div>
+
+                                    <!-- Placement Details -->
+                                    <div class="col">
+                                        <div class="p-3 pe-5">
+                                            <!-- Job Title -->
+                                            <h5 class="mb-2">
+                                                <a href="placement_details.php?id=<?= $placement->getPlacementId() ?>"
+                                                   class="text-decoration-none placement-links fw-bold">
+                                                    <?= htmlspecialchars($placement->getTitle()) ?>
+                                                </a>
+                                                <?php if ($placement->isDeadlineSoon()): ?>
+                                                    <span class="badge bg-danger ms-2">Deadline Soon!</span>
+                                                <?php endif; ?>
+                                            </h5>
+
+                                            <!-- Company Name, Location and Salary Range -->
+                                            <p class="mb-2">
+                                                <span class="text-decoration-none text-primary fw-bold">🏢 <?= htmlspecialchars($placement->getCompanyName()) ?></span>
+                                                <span class="text-muted mx-2">|</span>
+                                                <span class="text-muted">📍 <?= htmlspecialchars($placement->getLocation()) ?></span>
+                                                <span class="text-muted mx-2">|</span>
+                                                <span class="text-success">💰 <?= $placement->getSalaryRange() ?></span>
+                                            </p>
+
+                                            <!-- Deadline, Start Date, Duration -->
+                                            <p class="mb-2 text-muted">
+                                                <small>
+                                                    <strong>Deadline:</strong> <?= $placement->getFormattedDeadline() ?>
+                                                    <span class="mx-2">|</span>
+                                                    <strong>Starts:</strong> <?= $placement->getFormattedStartDate() ?>
+                                                    <span class="mx-2">|</span>
+                                                    <strong>Duration:</strong> <?= $placement->getDurationMonths() ?> months
+                                                </small>
+                                            </p>
+
+                                            <!-- Skills (First 3 + badge) -->
+                                            <?php if ($placement->hasSkills()): ?>
+                                                <div class="mb-0">
+                                                    <?php
+                                                    $skills = $placement->getSkills();
+                                                    $displaySkills = array_slice($skills, 0, 3);
+                                                    $remainingCount = count($skills) - 3;
+                                                    ?>
+                                                    <?php
+                                                    $skillLabel = (count($skills) === 1) ? "Skill" : "Skills";
+                                                    ?>
+                                                    <small><span class="text-muted"><strong><?= $skillLabel ?>:</strong></span></small>
+                                                    <?php foreach ($displaySkills as $skill): ?>
+                                                        <span class="badge bg-primary me-1"><?= htmlspecialchars($skill['skill_name']) ?></span>
+                                                    <?php endforeach; ?>
+                                                    <?php if ($remainingCount > 0): ?>
+                                                        <span class="badge bg-info">+<?= $remainingCount ?> more</span>
+                                                    <?php endif; ?>
+                                                    <?php if (!empty($view->isStudent) && $placement->getMatchPercentage() !== null): ?>
+                                                        <span class="badge bg-secondary ms-1">
+                                                            Match: <?= $placement->getMatchPercentage() ?>%
+                                                        </span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- No Placements Found -->
+                    <div class="alert alert-info text-center rounded-4 shadow-lg">
+                        <h4>No Opportunities Found</h4>
+                        <p>Try adjusting your search or filters to find more placements.</p>
+                        <a href="placements.php" class="btn btn-primary">Clear All Filters</a>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Pagination -->
+                <?php if ($view->totalPages > 1): ?>
+                    <div class="row mt-4 mb-5">
+                        <div class="col-12">
+                            <nav aria-label="Placement pagination">
+                                <ul class="pagination justify-content-center">
+                                    <!-- Previous Button -->
+                                    <li class="page-item <?= $view->currentPage <= 1 ? 'disabled' : '' ?>">
+                                        <a class="page-link rounded-4 me-1 shadow-sm card-hover"
+                                           href="?page=<?= $view->currentPage - 1 ?>&search=<?= urlencode($view->searchTerm) ?>&location=<?= urlencode($view->filterLocation) ?>&employer=<?= urlencode($view->filterEmployer) ?>&salary_min=<?= urlencode($view->filterSalary) ?>&duration=<?= urlencode($view->filterDuration) ?>&sort=<?= urlencode($view->sortBy) ?>">
+                                            Previous
+                                        </a>
+                                    </li>
+
+                                    <!-- Page Numbers -->
+                                    <?php for ($i = 1; $i <= $view->totalPages; $i++): ?>
+                                        <?php if ($i == 1 || $i == $view->totalPages || abs($i - $view->currentPage) <= 2): ?>
+                                            <li class="page-item <?= $i == $view->currentPage ? 'active' : '' ?>">
+                                                <a class="page-link rounded-5 mx-1 shadow-sm card-hover"
+                                                   href="?page=<?= $i ?>&search=<?= urlencode($view->searchTerm) ?>&location=<?= urlencode($view->filterLocation) ?>&employer=<?= urlencode($view->filterEmployer) ?>&salary_min=<?= urlencode($view->filterSalary) ?>&duration=<?= urlencode($view->filterDuration) ?>&sort=<?= urlencode($view->sortBy) ?>">
+                                                    <?= $i ?>
+                                                </a>
+                                            </li>
+                                        <?php elseif (abs($i - $view->currentPage) == 3): ?>
+                                            <li class="page-item disabled">
+                                                <span class="page-link rounded-4 mx-1">...</span>
+                                            </li>
+                                        <?php endif; ?>
+                                    <?php endfor; ?>
+
+                                    <!-- Next Button -->
+                                    <li class="page-item <?= $view->currentPage >= $view->totalPages ? 'disabled' : '' ?>">
+                                        <a class="page-link rounded-4 ms-1 shadow-sm card-hover"
+                                           href="?page=<?= $view->currentPage + 1 ?>&search=<?= urlencode($view->searchTerm) ?>&location=<?= urlencode($view->filterLocation) ?>&employer=<?= urlencode($view->filterEmployer) ?>&salary_min=<?= urlencode($view->filterSalary) ?>&duration=<?= urlencode($view->filterDuration) ?>&sort=<?= urlencode($view->sortBy) ?>">
+                                            Next
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+
+                            <!-- Page Info -->
+                            <p class="text-center text-white">
+                                Page <?= $view->currentPage ?> of <?= $view->totalPages ?>
+                                (Showing <?= count($view->placements) ?> of <?= $view->totalPlacements ?> opportunities)
+                            </p>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JavaScript for Bookmark Toggle (AJAX) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shortlistButtons = document.querySelectorAll('.shortlist-btn');
+
+            // Initialize all popovers
+            document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+                new bootstrap.Popover(el);
+            });
+
+            shortlistButtons.forEach(button => {
+                // Hover effect for bookmarked items
+                button.addEventListener('mouseenter', function() {
+                    if (this.dataset.shortlisted === 'true') {
+                        const checkIcon = this.querySelector('.bi-bookmark-check-fill');
+                        const dashIcon = this.querySelector('.bi-bookmark-dash');
+                        if (checkIcon && dashIcon) {
+                            checkIcon.classList.add('d-none');
+                            dashIcon.classList.remove('d-none');
+                        }
+                    }
+                });
+
+                button.addEventListener('mouseleave', function() {
+                    if (this.dataset.shortlisted === 'true') {
+                        const checkIcon = this.querySelector('.bi-bookmark-check-fill');
+                        const dashIcon = this.querySelector('.bi-bookmark-dash');
+                        if (checkIcon && dashIcon) {
+                            checkIcon.classList.remove('d-none');
+                            dashIcon.classList.add('d-none');
+                        }
+                    }
+                });
+
+                // Auto-hide popover after 2 seconds
+                button.addEventListener('click', function () {
+                    setTimeout(() => {
+                        const instance = bootstrap.Popover.getInstance(button);
+                        if (instance) instance.hide();
+                    }, 5000);
+                });
+
+                // Click handler
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const placementId = this.dataset.placementId;
+                    const isShortlisted = this.dataset.shortlisted === 'true';
+                    const action = isShortlisted ? 'remove' : 'add';
+
+                    // Send AJAX request
+                    fetch('placements.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `toggle_shortlist=1&placement_id=${placementId}&action=${action}`
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Toggle button appearance
+                                if (data.action === 'added') {
+                                    this.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-check-fill bookmark-icon text-success" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5m8.854-9.646a.5.5 0 0 0-.708-.708L7.5 7.793 6.354 6.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0z"/>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-dash bookmark-hover-icon text-danger d-none" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5M6 6a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1z"/>
+                            </svg>
+                        `;
+                                    this.dataset.shortlisted = 'true';
+                                } else {
+                                    this.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bookmark-plus bookmark-icon text-primary" viewBox="0 0 16 16">
+                                <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1z"/>
+                                <path d="M8 4a.5.5 0 0 1 .5.5V6H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V7H6a.5.5 0 0 1 0-1h1.5V4.5A.5.5 0 0 1 8 4"/>
+                            </svg>
+                        `;
+                                    this.dataset.shortlisted = 'false';
+                                }
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                });
+            });
+        });
+    </script>
+
+  </main>
+
+<?php require('template/footer.phtml'); ?>
